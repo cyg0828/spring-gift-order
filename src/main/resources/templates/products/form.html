@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${product.id} == null ? '상품 등록' : '상품 수정'"></title>
+</head>
+<body>
+
+<h1 th:text="${product.id} == null ? '상품 등록' : '상품 수정'"></h1>
+
+<form th:if="${product.id} == null"
+      th:action="@{/admin/products}"
+      th:object="${product}" method="post">
+
+    <div th:if="${#fields.hasGlobalErrors()}">
+        <p th:each="err : ${#fields.globalErrors()}"
+           th:text="${err}">에러 메시지</p>
+    </div>
+
+    <label>상품명:<br/>
+        <input type="text" th:field="*{name}" required />
+        <div th:if="${#fields.hasErrors('name')}"
+             th:errors="*{name}"
+             style="color: red; font-size: 0.8em;"></div>
+    </label><br/>
+
+    <label>가격:<br/>
+        <input type="number" th:field="*{price}" required />
+        <div th:if="${#fields.hasErrors('price')}"
+             th:errors="*{price}"
+             style="color: red; font-size: 0.8em;"></div>
+    </label><br/>
+
+    <label>이미지 URL:<br/>
+        <input type="text" th:field="*{imageUrl}" required />
+        <div th:if="${#fields.hasErrors('imageUrl')}"
+             th:errors="*{imageUrl}"
+             style="color: red; font-size: 0.8em;"></div>
+    </label><br/>
+
+    <fieldset id="optionsFieldset">
+        <legend>옵션 입력</legend>
+        <div>
+            <label>옵션 이름: <input type="text" name="optionNames" maxlength="50" required></label>
+            <label>수량: <input type="number" name="optionQuantities" min="1" max="99999999" required></label>
+        </div>
+    </fieldset>
+    <button type="button" onclick="addOptionField()">➕ 옵션 추가</button>
+    <br/><br/>
+
+    <button type="submit">등록</button>
+</form>
+
+<script>
+    function addOptionField() {
+        const container = document.getElementById("optionsFieldset");
+        const div = document.createElement("div");
+        div.innerHTML = `
+            <label>옵션 이름: <input type="text" name="optionNames" maxlength="50" required></label>
+            <label>수량: <input type="number" name="optionQuantities" min="1" max="99999999" required></label>
+        `;
+        container.appendChild(div);
+    }
+</script>
+
+<form th:if="${product.id} != null"
+      th:action="@{'/admin/products/' + ${product.id}}"
+      th:object="${product}" method="post">
+
+    <div th:if="${errorMessage}" style="color: red;">
+        <p th:text="${errorMessage}">에러 메시지</p>
+    </div>
+
+    <input type="hidden" th:field="*{id}" />
+
+    <label>상품명:<br/>
+        <input type="text" th:field="*{name}" required />
+        <div th:if="${#fields.hasErrors('name')}"
+             th:errors="*{name}"
+             style="color: red; font-size: 0.8em;"></div>
+    </label><br/>
+
+    <label>가격:<br/>
+        <input type="number" th:field="*{price}" required />
+        <div th:if="${#fields.hasErrors('price')}"
+             th:errors="*{price}"
+             style="color: red; font-size: 0.8em;"></div>
+    </label><br/>
+
+    <label>이미지 URL:<br/>
+        <input type="text" th:field="*{imageUrl}" required />
+        <div th:if="${#fields.hasErrors('imageUrl')}"
+             th:errors="*{imageUrl}"
+             style="color: red; font-size: 0.8em;"></div>
+    </label><br/>
+
+    <button type="submit">수정</button>
+    <hr>
+    <h3>옵션 목록</h3>
+
+    <table>
+        <thead>
+        <tr>
+            <th>옵션 이름</th>
+            <th>수량</th>
+            <th>삭제</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="option : ${product.options}">
+            <td>
+                <input type="text" name="optionNames" th:value="${option.name}" />
+            </td>
+            <td>
+                <input type="number" name="optionQuantities" th:value="${option.quantity}" min="1" />
+            </td>
+            <td>
+                <input type="checkbox" name="deleteOptionIds" th:value="${option.id}" /> 삭제
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <h4>새 옵션 추가</h4>
+    <label>이름: <input type="text" name="newOptionName" /></label><br>
+    <label>수량: <input type="number" name="newOptionQuantity" min="1" /></label><br>
+
+    <button type="submit">수정</button>
+</form>
+
+<br/>
+<a href="/admin/products">목록으로 돌아가기</a>
+
+</body>
+</html>
