@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>상품 목록</title>
+</head>
+<body>
+<h1>상품 목록</h1>
+
+<div style="margin-bottom: 20px;">
+    <a href="/admin/products/new"><button>➕ 상품 등록</button></a>
+</div>
+
+<table border="1">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>이름</th>
+        <th>가격</th>
+        <th>이미지 URL</th>
+        <th>수정</th>
+        <th>삭제</th>
+        <th>옵션 보기</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="product : ${products.content}">
+        <td th:text="${product.id}">1</td>
+        <td th:text="${product.name}">상품명</td>
+        <td th:text="${product.price}">1000</td>
+        <td th:text="${product.imageUrl}">http://example.com</td>
+        <td><a th:href="@{/admin/products/{id}/edit(id=${product.id})}">수정</a></td>
+        <td>
+            <form th:action="@{/admin/products/{id}/delete(id=${product.id})}" method="post">
+                <button type="submit">삭제</button>
+            </form>
+        </td>
+        <td>
+            <button type="button" th:onclick="'showOptions(' + ${product.id} + ')'">옵션 보기</button>
+        </td>
+
+    </tr>
+
+    <tr th:each="product : ${products.content}" th:id="'option-row-' + ${product.id}" style="display:none;">
+        <td colspan="7">
+            <div th:id="'options-' + ${product.id}">옵션 로딩 중...</div>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<!-- 페이지네이션 -->
+<div>
+    <span th:if="${products.hasPrevious()}">
+        <a th:href="@{/admin/products(page=${products.number - 1})}">이전</a>
+    </span>
+
+    <span th:each="i : ${#numbers.sequence(0, products.totalPages - 1)}">
+        <a th:href="@{/admin/products(page=${i})}"
+           th:text="${i + 1}"
+           th:classappend="${i} == ${products.number} ? 'current-page' : ''">1</a>
+    </span>
+
+    <span th:if="${products.hasNext()}">
+        <a th:href="@{/admin/products(page=${products.number + 1})}">다음</a>
+    </span>
+</div>
+
+<!-- 옵션 조회 JS -->
+<script>
+    function showOptions(productId) {
+        const row = document.getElementById("option-row-" + productId);
+        const container = document.getElementById("options-" + productId);
+
+        if (row.style.display === "none") {
+            fetch(`/api/products/${productId}/options`)
+                .then(res => res.json())
+                .then(options => {
+                    if (options.length === 0) {
+                        container.innerHTML = "<i>등록된 옵션이 없습니다.</i>";
+                    } else {
+                        container.innerHTML = `
+                            <ul>
+                                ${options.map(o => `<li>${o.name} (${o.quantity}개)</li>`).join('')}
+                            </ul>
+                        `;
+                    }
+                    row.style.display = "table-row";
+                })
+                .catch(err => {
+                    container.innerHTML = `<span style="color:red;">옵션 조회 실패: ${err}</span>`;
+                    row.style.display = "table-row";
+                });
+        } else {
+            row.style.display = "none";
+        }
+    }
+</script>
+</body>
+</html>
+
