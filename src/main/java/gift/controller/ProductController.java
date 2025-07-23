@@ -9,7 +9,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
@@ -42,7 +41,7 @@ public class ProductController {
     public void deleteProduct(@PathVariable Long id) {
         productService.delete(id);
     }
-
+  
     @GetMapping("/{id}/options")
     public List<ProductOptionResponse> getOptions(@PathVariable Long id) {
         return productService.findOptionsByProductId(id);

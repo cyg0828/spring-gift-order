@@ -7,8 +7,6 @@ INSERT INTO member (email, password) VALUES
                                         ('admin@email.com', 'password'),
                                         ('user1@email.com', '1234');
 
-
-
 INSERT INTO product (name, price, image_url) VALUES ('상품 1', 1000, 'http://image1.com');
 INSERT INTO product (name, price, image_url) VALUES ('상품 2', 2000, 'http://image2.com');
 INSERT INTO product (name, price, image_url) VALUES ('상품 3', 3000, 'http://image3.com');

@@ -1,5 +1,6 @@
 package gift.controller;
 
+
 import gift.domain.Product;
 import gift.domain.ProductOption;
 import gift.dto.ProductRequest;
@@ -17,7 +18,9 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Controller
 @RequestMapping("/admin/products")
@@ -64,28 +67,30 @@ public class ProductAdminController {
 
         Long productId = productService.save(request).getId();
         Product product = productRepository.findById(productId).orElseThrow();
-        for (int i = 0; i < optionNames.size(); i++) {
-            String name = optionNames.get(i);
-            int quantity = optionQuantities.get(i);
 
-            try {
-                productOptionService.validateName(name);
-                productOptionService.validateQuantity(quantity);
-                productOptionService.validateDuplicateName(product, name);
-            } catch (IllegalArgumentException e) {
-                bindingResult.reject("option.error", e.getMessage());
-                model.addAttribute("product", request);
-                return "products/form";
+        try {
+            Set<String> nameSet = new HashSet<>();
+            for (int i = 0; i < optionNames.size(); i++) {
+                String name = optionNames.get(i);
+                int quantity = optionQuantities.get(i);
+
+                if (!nameSet.add(name)) {
+                    throw new IllegalArgumentException("옵션 이름이 중복됩니다: " + name);
+                }
+
+                ProductOption option = new ProductOption(product, name, quantity); // ← 여기서 예외 가능
+                product.addOption(option);
+                productOptionRepository.save(option);
             }
 
-            ProductOption option = new ProductOption(product, name, quantity);
-            product.addOption(option);
-            productOptionRepository.save(option);
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("product", request);
+            model.addAttribute("errorMessage", e.getMessage());
+            return "products/form";
         }
 
         return "redirect:/admin/products";
     }
-
 
     @GetMapping("/{id}/edit")
     public String editForm(@PathVariable Long id, Model model) {
@@ -129,7 +134,6 @@ public class ProductAdminController {
 
         return "redirect:/admin/products";
     }
-
 
     @PostMapping("/{id}/delete")
     public String delete(@PathVariable Long id) {

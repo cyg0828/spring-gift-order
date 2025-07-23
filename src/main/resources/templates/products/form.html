@@ -11,10 +11,13 @@
 <form th:if="${product.id} == null"
       th:action="@{/admin/products}"
       th:object="${product}" method="post">
-
     <div th:if="${#fields.hasGlobalErrors()}">
         <p th:each="err : ${#fields.globalErrors()}"
            th:text="${err}">에러 메시지</p>
+    </div>
+
+    <div th:if="${errorMessage}" class="alert alert-danger" style="color: red; font-size: 0.9em;">
+        <p th:text="${errorMessage}"></p>
     </div>
 
     <label>상품명:<br/>
@@ -70,7 +73,6 @@
     <div th:if="${errorMessage}" style="color: red;">
         <p th:text="${errorMessage}">에러 메시지</p>
     </div>
-
     <input type="hidden" th:field="*{id}" />
 
     <label>상품명:<br/>
@@ -109,7 +111,7 @@
         <tbody>
         <tr th:each="option : ${product.options}">
             <td>
-                <input type="text" name="optionNames" th:value="${option.name}" />
+                <input type="text" name="optionNames" th:value="${option.name}" maxlength="50" />
             </td>
             <td>
                 <input type="number" name="optionQuantities" th:value="${option.quantity}" min="1" />
@@ -122,7 +124,7 @@
     </table>
 
     <h4>새 옵션 추가</h4>
-    <label>이름: <input type="text" name="newOptionName" /></label><br>
+    <label>이름: <input type="text" name="newOptionName" maxlength="50"/></label><br>
     <label>수량: <input type="number" name="newOptionQuantity" min="1" /></label><br>
 
     <button type="submit">수정</button>

@@ -48,6 +48,7 @@ public class WishService {
                 .ifPresent(wishRepository::delete);
     }
 
+
     public Page<Product> getWishProducts(Long memberId, Pageable pageable) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NoSuchElementException("회원이 존재하지 않습니다."));
@@ -55,4 +56,5 @@ public class WishService {
         return wishRepository.findByMember(member, pageable)
                 .map(Wish::getProduct);
     }
+
 }

@@ -23,6 +23,7 @@ public class WishController {
     public Page<Product> getWishes(@LoginMember Member member, Pageable pageable) {
         return wishService.getWishProducts(member.getId(), pageable);
     }
+
     @PostMapping
     public void addWish(@RequestBody WishRequest request, @LoginMember Member member) {
         wishService.addWish(member.getId(), request.getProductId());
