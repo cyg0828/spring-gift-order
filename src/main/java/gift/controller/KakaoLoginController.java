@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.view.RedirectView;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Controller
 public class KakaoLoginController {
@@ -23,17 +24,21 @@ public class KakaoLoginController {
     }
 
     @GetMapping("kakao/login")
-    public RedirectView redirectToKakaoAuth(@RequestParam String clientId, HttpSession session) {
+    public String redirectToKakaoAuth(@RequestParam String clientId, HttpSession session) {
 
         session.setAttribute("clientId", clientId);
         session.setAttribute("redirectUri", "http://localhost:8080");
 
-        String kakaoAuthUrl = "https://kauth.kakao.com/oauth/authorize"
-                + "?response_type=code"
-                + "&client_id=" + clientId
-                + "&redirect_uri=http://localhost:8080"
-                + "&scope=talk_message";
-        return new RedirectView(kakaoAuthUrl);
+        String kakaoAuthUrl = UriComponentsBuilder
+                .fromHttpUrl("https://kauth.kakao.com/oauth/authorize")
+                .queryParam("response_type", "code")
+                .queryParam("client_id", clientId)
+                .queryParam("redirect_uri", "http://localhost:8080")
+                .queryParam("scope", "talk_message")
+                .build()
+                .toUriString();
+
+        return "redirect:" + kakaoAuthUrl;
     }
 
     @GetMapping
