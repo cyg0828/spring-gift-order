@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>카카오 로그인</title>
+</head>
+<body>
+<h1>카카오 로그인</h1>
+
+<form th:action="@{/kakao/login}" method="get">
+    <label for="clientId">REST API 키:</label>
+    <input type="text" id="clientId" name="clientId" />
+    <button type="submit">카카오 로그인</button>
+</form>
+</body>
+</html>
