@@ -17,6 +17,6 @@ public class KakaoLoginService {
         String clientId = (String) session.getAttribute("clientId");
         String redirectUri = (String) session.getAttribute("redirectUri");
 
-        return kakaoClient.requestAccessToken(authorizationCode, clientId, redirectUri);
+        return kakaoClient.getAccessToken(authorizationCode, clientId, redirectUri);
     }
 }
