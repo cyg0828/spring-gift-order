@@ -2,13 +2,10 @@ package gift.controller;
 
 import gift.auth.JwtProvider;
 import gift.domain.Order;
-import gift.domain.Product;
 import gift.dto.OrderRequest;
 import gift.dto.OrderResponse;
 import gift.dto.ProductResponse;
 import gift.dto.WishDto;
-import gift.repository.OrderRepository;
-import gift.repository.ProductOptionRepository;
 import gift.service.KakaoMessageService;
 import gift.service.OrderService;
 import gift.service.ProductService;
@@ -32,19 +29,15 @@ public class MessageController {
 
     private final ProductService productService;
     private final OrderService orderService;
-    private final KakaoMessageService kakaoMessageService;
-    private final ProductOptionRepository productOptionRepository;
     private final WishService wishService;
     private final JwtProvider jwtProvider;
+
     public MessageController(OrderService orderService,
                              KakaoMessageService kakaoMessageService,
-                             ProductOptionRepository productOptionRepository,
                              ProductService productService,
                              WishService wishService,
                              JwtProvider jwtProvider) {
         this.orderService = orderService;
-        this.kakaoMessageService = kakaoMessageService;
-        this.productOptionRepository = productOptionRepository;
         this.productService = productService;
         this.wishService = wishService;
         this.jwtProvider = jwtProvider;
@@ -66,7 +59,6 @@ public class MessageController {
                               @RequestParam String message,
                               Model model,
                               HttpSession session, @PageableDefault(size = 5, sort = "id", direction = Sort.Direction.ASC)Pageable pageable) {
-        String jwtAccessToken = (String) session.getAttribute("jwtAccessToken");
         String kakaoAccessToken = (String) session.getAttribute("kakaoAccessToken");
 
         if (kakaoAccessToken == null) {
@@ -79,12 +71,7 @@ public class MessageController {
 
 
         try {
-            OrderRequest orderRequest = new OrderRequest(optionId, quantity, message);
-            OrderResponse orderResponse = orderService.placeOrder(orderRequest);
-
-            Order order = orderService.findById(orderResponse.getId());
-            kakaoMessageService.sendOrderMessage(kakaoAccessToken, order);
-
+            orderService.orderandMessage(optionId, quantity, message, kakaoAccessToken);
             model.addAttribute("sent", true);
         } catch (Exception e) {
             model.addAttribute("error", "에러 발생");

@@ -73,11 +73,7 @@ public class WishService {
                 .orElseThrow(() -> new NoSuchElementException("회원이 존재하지 않습니다."));
 
         return wishRepository.findByMember(member).stream()
-                .map(wish -> new WishDto(
-                        wish.getProduct().getName(),
-                        wish.getOption() != null ? wish.getOption().getName() : "-",
-                        wish.getOption() != null ? wish.getOption().getQuantity() : 0
-                ))
+                .map(WishDto::new)
                 .toList();
     }
 

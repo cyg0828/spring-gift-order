@@ -1,6 +1,7 @@
 package gift.dto;
 
 import java.time.LocalDateTime;
+import gift.domain.Order;
 
 public class OrderResponse {
     private Long id;
@@ -15,6 +16,16 @@ public class OrderResponse {
         this.quantity = quantity;
         this.orderDate = orderDate;
         this.message = message;
+    }
+
+    public static OrderResponse from(Order order) {
+        return new OrderResponse(
+                order.getId(),
+                order.getOption().getId(),
+                order.getQuantity(),
+                order.getOrderDateTime(),
+                order.getMessage()
+        );
     }
 
     public Long getId() {

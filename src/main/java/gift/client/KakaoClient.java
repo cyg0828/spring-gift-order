@@ -1,52 +1,53 @@
 package gift.client;
 
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestClient;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @Component
 public class KakaoClient {
 
-    private final RestClient restClient;
+    private final WebClient webClient;
 
     public KakaoClient() {
-        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
-        factory.setConnectTimeout(5000);
-        factory.setReadTimeout(5000);
-
-        this.restClient = RestClient.builder()
+        this.webClient = WebClient.builder()
                 .baseUrl("https://kauth.kakao.com")
-                .requestFactory(factory)
+                .defaultHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED_VALUE)
                 .build();
     }
 
-
     public String getAccessToken(String code, String clientId, String redirectUri) {
-        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-        body.add("grant_type", "authorization_code");
-        body.add("client_id", clientId);
-        body.add("redirect_uri", redirectUri);
-        body.add("code", code);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+        formData.add("grant_type", "authorization_code");
+        formData.add("client_id", clientId);
+        formData.add("redirect_uri", redirectUri);
+        formData.add("code", code);
 
         try {
-            String response = restClient.post()
+            return webClient.post()
                     .uri("/oauth/token")
-                    .headers(h -> h.addAll(headers))
-                    .body(body)
+                    .body(BodyInserters.fromFormData(formData))
                     .retrieve()
-                    .body(String.class);
-            return response;
-        }catch (Exception e){
+                    .bodyToMono(String.class)
+                    .block();
+        } catch (Exception e) {
             throw new KakaoClientException("카카오 토큰 요청 중 오류 발생", e);
         }
+    }
 
-
+    public String getUserInfo(String accessToken) {
+        try {
+            return webClient.get()
+                    .uri("https://kapi.kakao.com/v2/user/me")
+                    .header("Authorization", "Bearer " + accessToken)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
+        } catch (Exception e) {
+            throw new KakaoClientException("카카오 사용자 정보 요청 중 오류 발생", e);
+        }
     }
 }

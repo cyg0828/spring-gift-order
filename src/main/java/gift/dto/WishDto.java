@@ -1,14 +1,21 @@
 package gift.dto;
 
+import gift.domain.Wish;
+
 public class WishDto {
     private final String productName;
     private final String optionName;
-    private final int quantity;
+    private final int optionQuantity;
 
-    public WishDto(String productName, String optionName, int quantity) {
-        this.productName = productName;
-        this.optionName = optionName;
-        this.quantity = quantity;
+    public WishDto(Wish wish) {
+        this.productName = wish.getProduct().getName();
+        if (wish.getOption() != null) {
+            this.optionName = wish.getOption().getName();
+            this.optionQuantity = wish.getOption().getQuantity();
+        } else {
+            this.optionName = "-";
+            this.optionQuantity = 0;
+        }
     }
 
     public String getProductName() {
@@ -20,6 +27,6 @@ public class WishDto {
     }
 
     public int getQuantity() {
-        return quantity;
+        return optionQuantity;
     }
 }
