@@ -5,14 +5,12 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.view.RedirectView;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Controller
 public class KakaoLoginController {
 
-    KakaoLoginService kakaoLoginService;
+    private final KakaoLoginService kakaoLoginService;
 
     public KakaoLoginController(KakaoLoginService kakaoLoginService) {
         this.kakaoLoginService = kakaoLoginService;
@@ -42,11 +40,16 @@ public class KakaoLoginController {
     }
 
     @GetMapping
-    @ResponseBody
     public String redirectToKakaoLogin(@RequestParam String code, HttpSession session) {
-        return kakaoLoginService.getAccessToken(code, session);
+        try {
+            String jwt = kakaoLoginService.loginAndIssueJwt(code, session);
+            session.setAttribute("jwtAccessToken", jwt);
+            return "redirect:/message";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "login";
+        }
     }
-
 
 
 }
